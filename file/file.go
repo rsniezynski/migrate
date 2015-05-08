@@ -17,6 +17,9 @@ import (
 
 var filenameRegex = `^([0-9]+)_(.*)\.(up|down)\.%s$`
 
+var FileReader = ioutil.ReadFile
+var DirReader = ioutil.ReadDir
+
 // FilenameRegex builds regular expression stmt with given
 // filename extension from driver.
 func FilenameRegex(filenameExtension string) *regexp.Regexp {
@@ -66,7 +69,7 @@ type MigrationFiles []MigrationFile
 // ReadContent reads the file's content if the content is empty
 func (f *File) ReadContent() error {
 	if len(f.Content) == 0 {
-		content, err := ioutil.ReadFile(path.Join(f.Path, f.FileName))
+		content, err := FileReader(path.Join(f.Path, f.FileName))
 		if err != nil {
 			return err
 		}
@@ -152,7 +155,7 @@ func (mf *MigrationFiles) From(version uint64, relativeN int) (Files, error) {
 // ReadMigrationFiles reads all migration files from a given path
 func ReadMigrationFiles(path string, filenameRegex *regexp.Regexp) (files MigrationFiles, err error) {
 	// find all migration files in path
-	ioFiles, err := ioutil.ReadDir(path)
+	ioFiles, err := DirReader(path)
 	if err != nil {
 		return nil, err
 	}
