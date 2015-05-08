@@ -22,8 +22,10 @@ var version = flag.Bool("version", false, "Show migrate version")
 
 func main() {
 	flag.Parse()
-	command := flag.Arg(0)
+	Run(flag.Arg(0), flag.Arg(1))
+}
 
+func Run(command, arg string) {
 	if *version {
 		fmt.Println(Version)
 		os.Exit(0)
@@ -36,7 +38,7 @@ func main() {
 	switch command {
 	case "create":
 		verifyMigrationsPath(*migrationsPath)
-		name := flag.Arg(1)
+		name := arg
 		if name == "" {
 			fmt.Println("Please specify name.")
 			os.Exit(1)
@@ -54,7 +56,7 @@ func main() {
 
 	case "migrate":
 		verifyMigrationsPath(*migrationsPath)
-		relativeN := flag.Arg(1)
+		relativeN := arg
 		relativeNInt, err := strconv.Atoi(relativeN)
 		if err != nil {
 			fmt.Println("Unable to parse param <n>.")
@@ -71,7 +73,7 @@ func main() {
 
 	case "goto":
 		verifyMigrationsPath(*migrationsPath)
-		toVersion := flag.Arg(1)
+		toVersion := arg
 		toVersionInt, err := strconv.Atoi(toVersion)
 		if err != nil || toVersionInt < 0 {
 			fmt.Println("Unable to parse param <v>.")
