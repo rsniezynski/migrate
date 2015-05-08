@@ -22,40 +22,44 @@ var version = flag.Bool("version", false, "Show migrate version")
 
 func main() {
 	flag.Parse()
-	Run(flag.Arg(0), flag.Arg(1))
+	var command string
+	if *version {
+		command = "showversion"
+	} else {
+		command = flag.Arg(0)
+	}
+	Run(*migrationsPath, *url, command, flag.Arg(1))
 }
 
-func Run(command, arg string) {
-	if *version {
-		fmt.Println(Version)
-		os.Exit(0)
-	}
-
-	if *migrationsPath == "" {
-		*migrationsPath, _ = os.Getwd()
+func Run(migrationsPath, url string, command, arg string) {
+	if migrationsPath == "" {
+		migrationsPath, _ = os.Getwd()
 	}
 
 	switch command {
+	case "showversion":
+		fmt.Println(Version)
+		os.Exit(0)
 	case "create":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		name := arg
 		if name == "" {
 			fmt.Println("Please specify name.")
 			os.Exit(1)
 		}
 
-		migrationFile, err := migrate.Create(*url, *migrationsPath, name)
+		migrationFile, err := migrate.Create(url, migrationsPath, name)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("Version %v migration files created in %v:\n", migrationFile.Version, *migrationsPath)
+		fmt.Printf("Version %v migration files created in %v:\n", migrationFile.Version, migrationsPath)
 		fmt.Println(migrationFile.UpFile.FileName)
 		fmt.Println(migrationFile.DownFile.FileName)
 
 	case "migrate":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		relativeN := arg
 		relativeNInt, err := strconv.Atoi(relativeN)
 		if err != nil {
@@ -64,7 +68,7 @@ func Run(command, arg string) {
 		}
 		timerStart = time.Now()
 		pipe := pipep.New()
-		go migrate.Migrate(pipe, *url, *migrationsPath, relativeNInt)
+		go migrate.Migrate(pipe, url, migrationsPath, relativeNInt)
 		ok := writePipe(pipe)
 		printTimer()
 		if !ok {
@@ -72,7 +76,7 @@ func Run(command, arg string) {
 		}
 
 	case "goto":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		toVersion := arg
 		toVersionInt, err := strconv.Atoi(toVersion)
 		if err != nil || toVersionInt < 0 {
@@ -80,7 +84,7 @@ func Run(command, arg string) {
 			os.Exit(1)
 		}
 
-		currentVersion, err := migrate.Version(*url, *migrationsPath)
+		currentVersion, err := migrate.Version(url, migrationsPath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -90,7 +94,7 @@ func Run(command, arg string) {
 
 		timerStart = time.Now()
 		pipe := pipep.New()
-		go migrate.Migrate(pipe, *url, *migrationsPath, relativeNInt)
+		go migrate.Migrate(pipe, url, migrationsPath, relativeNInt)
 		ok := writePipe(pipe)
 		printTimer()
 		if !ok {
@@ -98,10 +102,10 @@ func Run(command, arg string) {
 		}
 
 	case "up":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		timerStart = time.Now()
 		pipe := pipep.New()
-		go migrate.Up(pipe, *url, *migrationsPath)
+		go migrate.Up(pipe, url, migrationsPath)
 		ok := writePipe(pipe)
 		printTimer()
 		if !ok {
@@ -109,10 +113,10 @@ func Run(command, arg string) {
 		}
 
 	case "down":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		timerStart = time.Now()
 		pipe := pipep.New()
-		go migrate.Down(pipe, *url, *migrationsPath)
+		go migrate.Down(pipe, url, migrationsPath)
 		ok := writePipe(pipe)
 		printTimer()
 		if !ok {
@@ -120,10 +124,10 @@ func Run(command, arg string) {
 		}
 
 	case "redo":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		timerStart = time.Now()
 		pipe := pipep.New()
-		go migrate.Redo(pipe, *url, *migrationsPath)
+		go migrate.Redo(pipe, url, migrationsPath)
 		ok := writePipe(pipe)
 		printTimer()
 		if !ok {
@@ -131,10 +135,10 @@ func Run(command, arg string) {
 		}
 
 	case "reset":
-		verifyMigrationsPath(*migrationsPath)
+		verifyMigrationsPath(migrationsPath)
 		timerStart = time.Now()
 		pipe := pipep.New()
-		go migrate.Reset(pipe, *url, *migrationsPath)
+		go migrate.Reset(pipe, url, migrationsPath)
 		ok := writePipe(pipe)
 		printTimer()
 		if !ok {
@@ -142,8 +146,8 @@ func Run(command, arg string) {
 		}
 
 	case "version":
-		verifyMigrationsPath(*migrationsPath)
-		version, err := migrate.Version(*url, *migrationsPath)
+		verifyMigrationsPath(migrationsPath)
+		version, err := migrate.Version(url, migrationsPath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
