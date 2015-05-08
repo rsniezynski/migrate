@@ -6,9 +6,9 @@ import (
 	"fmt"
 	neturl "net/url" // alias to allow `url string` func signature in New
 
-	"github.com/mattes/migrate/driver/bash"
-	"github.com/mattes/migrate/driver/postgres"
-	"github.com/mattes/migrate/file"
+	"github.com/rsniezynski/migrate/driver/bash"
+	"github.com/rsniezynski/migrate/driver/postgres"
+	"github.com/rsniezynski/migrate/file"
 )
 
 // Driver is the interface type that needs to implemented by all drivers.
