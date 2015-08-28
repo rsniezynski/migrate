@@ -1,7 +1,7 @@
 // Package main is the CLI.
 // You can use the CLI via Terminal.
 // import "github.com/rsniezynski/migrate/migrate" for usage within Go.
-package main
+package migratemain
 
 import (
 	"flag"
